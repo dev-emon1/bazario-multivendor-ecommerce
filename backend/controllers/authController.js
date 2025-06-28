@@ -1,10 +1,42 @@
+const adminModel = require("../models/adminModel");
+const { createToken } = require("../utils/generateToken");
+const { responseReturn } = require("../utils/response");
+const bcrypt = require("bcrypt");
 class authController {
   admin_login = async (req, res) => {
-    console.log(req.body);
-    res.send({
-      message: "Admin login successful",
-      user: req.body,
-    });
+    try {
+      const { email, password } = req.body;
+      const admin = await adminModel.findOne({ email }).select("+password");
+      if (admin) {
+        const matchedPassword = await bcrypt.compare(password, admin.password);
+        if (matchedPassword) {
+          const token = await createToken(admin.id, admin.role);
+
+          res.cookie("accessToken", token, {
+            httpOnly: true,
+            secure: true,
+            expires: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000),
+          });
+
+          responseReturn(res, 200, {
+            token,
+            message: "Login successful",
+          });
+        } else {
+          responseReturn(res, 401, {
+            error: "Credentials do not match",
+          });
+        }
+      } else {
+        responseReturn(res, 404, {
+          error: "Admin not found",
+        });
+      }
+    } catch (error) {
+      responseReturn(res, 500, {
+        error: error.message,
+      });
+    }
   };
 }
 

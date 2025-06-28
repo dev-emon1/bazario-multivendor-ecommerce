@@ -1,14 +1,21 @@
-import React from "react";
-import { useDispatch } from "react-redux";
-import { admin_login } from "../../store/Reducers/authReducer";
+import React, { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { admin_login, messageCleared } from "../../store/Reducers/authReducer";
+import { BarLoader } from "react-spinners";
+import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 const AdminLogin = () => {
   const [inputData, setInputData] = React.useState({
     email: "",
     password: "",
   });
+  const navigate = useNavigate();
 
   const dispatch = useDispatch();
+  const { isLoading, errorMessage, successMessage } = useSelector(
+    (state) => state.auth
+  );
 
   const handleInputChange = (e) => {
     setInputData({
@@ -20,12 +27,27 @@ const AdminLogin = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     dispatch(admin_login(inputData));
-    // console.log(inputData);
+  };
+
+  useEffect(() => {
+    if (errorMessage) {
+      toast.error(errorMessage);
+      dispatch(messageCleared());
+    }
+    if (successMessage) {
+      toast.success(successMessage);
+      dispatch(messageCleared());
+      navigate("/");
+    }
+  }, [errorMessage, successMessage]);
+
+  const overRideSpinner = {
+    margin: "1% auto",
   };
   return (
     <div className="min-w-screen min-h-screen flex justify-center items-center bg-[#e9e8f7]">
       <div className="w-[350px] text-white p-2">
-        <div className="bg-[#4b4b6d] p-5 rounded-lg shadow-lg">
+        <div className="bg-[#4b4b6d] p-6 rounded-lg shadow-lg">
           <div className="h-20 flex justify-center items-center mb-3">
             <div className="w-[180px] h-[50px]">
               <img
@@ -64,8 +86,19 @@ const AdminLogin = () => {
               />
             </div>
 
-            <button className="bg-[#F7941D] w-full hover:shadow-blue-950 hover:shadow-sm px-7 py-2 mb-3 rounded-md text-white font-semibold transition-all duration-200 ease-in-out">
-              Login
+            <button
+              disabled={isLoading ? true : false}
+              className="bg-[#F7941D] w-full hover:shadow-blue-950 hover:shadow-sm px-7 py-2 mb-3 rounded-md text-white font-semibold transition-all duration-200 ease-in-out"
+            >
+              {isLoading ? (
+                <BarLoader
+                  color="#ffffff"
+                  width={100}
+                  cssOverride={overRideSpinner}
+                />
+              ) : (
+                "Login"
+              )}
             </button>
           </form>
         </div>
