@@ -1,7 +1,30 @@
-import React from "react";
+import React, { forwardRef } from "react";
+import { FixedSizeList as List } from "react-window";
 import { BiDollar } from "react-icons/bi";
 
+function handleOnWheel(deltaY) {
+  console.log("Wheel", deltaY);
+}
+
+const outerElement = forwardRef((props, ref) => (
+  <div ref={ref} onWheel={(e) => handleOnWheel(e.deltaY)} {...props} />
+));
+
 const Payments = () => {
+  const Row = ({ index, style }) => {
+    return (
+      <div style={style} className="text-sm flex mt-1">
+        <div className="w-[25%] whitespace-nowrap p-2">{index + 1}</div>
+        <div className="w-[25%] whitespace-nowrap p-2">$2301</div>
+        <div className="w-[25%] whitespace-nowrap p-2">
+          <span className="py-1 px-2 bg-slate-200 text-blue-500 rounded-md text-sm">
+            Pending
+          </span>
+        </div>
+        <div className="w-[25%] whitespace-nowrap p-2">25 Dec 2023</div>
+      </div>
+    );
+  };
   return (
     <div className="px-2 md:px-7 py-5 bg-[#cac4ff]">
       <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-7">
@@ -39,6 +62,77 @@ const Payments = () => {
           </div>
           <div className="w-10 h-10 rounded-full bg-blue-400 text-2xl flex justify-center items-center text-white">
             <BiDollar />
+          </div>
+        </div>
+      </div>
+
+      <div className="w-full grid grid-cols-1 lg:grid-cols-2 pb-4 gap-2">
+        <div className="p-5 bg-white rounded-md mt-5">
+          <h2 className="text-lg font-semibold">Send Request</h2>
+          <div className="pt-5">
+            <form>
+              <div className="flex flex-wrap gap-3">
+                <input
+                  min={0}
+                  type="number"
+                  className="px-2 py-2 outline-none bg-transparent border border-[#e0e0e0] rounded-md min-w-[200px] text-[#030818] text-sm md:w-[80%] focus:border-indigo-200"
+                />
+                <button className="px-7 py-2 bg-green-500 hover:bg-green-500/80 rounded-md text-white">
+                  Submit
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <div>
+            <h3 className="text-lg py-4">Pending Request</h3>
+            <div>
+              <div className="w-full overflow-x-auto">
+                <div className="flex bg-[#eae9f7] uppercase text-xs font-bold min-w-[340px] rounded-md">
+                  <div className="w-[25%] p-2">No</div>
+                  <div className="w-[25%] p-2">Amount</div>
+                  <div className="w-[25%] p-2">Status</div>
+                  <div className="w-[25%] p-2">Date</div>
+                </div>
+                {
+                  <List
+                    style={{ minWidth: "340px" }}
+                    className="List"
+                    height={350}
+                    itemCount={10}
+                    itemSize={35}
+                    outerElementType={outerElement}
+                  >
+                    {Row}
+                  </List>
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="bg-white p-5 mt-5 rounded-md">
+          <h3 className="text-lg pb-4 font-medium">Success Withdrawals</h3>
+          <div>
+            <div className="w-full overflow-x-auto">
+              <div className="flex bg-[#eae9f7] uppercase text-xs font-bold min-w-[340px] rounded-md">
+                <div className="w-[25%] p-2">No</div>
+                <div className="w-[25%] p-2">Amount</div>
+                <div className="w-[25%] p-2">Status</div>
+                <div className="w-[25%] p-2">Date</div>
+              </div>
+              {
+                <List
+                  style={{ minWidth: "340px" }}
+                  className="List"
+                  height={350}
+                  itemCount={10}
+                  itemSize={35}
+                  outerElementType={outerElement}
+                >
+                  {Row}
+                </List>
+              }
+            </div>
           </div>
         </div>
       </div>
