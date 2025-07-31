@@ -38,6 +38,25 @@ class authController {
       });
     }
   };
+
+  // Get users profile
+  get_users_profile = async (req, res) => {
+    const { id, role } = req;
+    try {
+      if (role === "admin") {
+        const user = await adminModel.findById(id);
+        responseReturn(res, 200, {
+          userInfo: user,
+        });
+      } else {
+        console.log("Seller Info");
+      }
+    } catch (error) {
+      responseReturn(res, 500, {
+        error: error.message,
+      });
+    }
+  };
 }
 
 module.exports = new authController();
