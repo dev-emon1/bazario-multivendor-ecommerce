@@ -1,4 +1,6 @@
 import { lazy } from "react";
+import Pending from "../../views/Pending";
+import Deactivate from "../../views/Deactivate";
 
 const OrderDetails = lazy(() => import("../../views/seller/OrderDetails"));
 const EditProduct = lazy(() => import("../../views/seller/EditProduct"));
@@ -19,6 +21,16 @@ const SellerDashboard = lazy(() =>
 );
 
 export const sellerRoutes = [
+  {
+    path: "/seller/account-pending",
+    element: <Pending />,
+    ability: "seller",
+  },
+  {
+    path: "/seller/account-deactivate",
+    element: <Deactivate />,
+    ability: "seller",
+  },
   {
     path: "/seller/dashboard",
     element: <SellerDashboard />,
