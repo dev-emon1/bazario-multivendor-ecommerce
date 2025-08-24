@@ -4,6 +4,7 @@ import { admin_login, messageCleared } from "../../store/Reducers/authReducer";
 import { BarLoader } from "react-spinners";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import { overRideSpinner } from "../../utils/utils";
 
 const AdminLogin = () => {
   const [inputData, setInputData] = React.useState({
@@ -41,9 +42,6 @@ const AdminLogin = () => {
     }
   }, [errorMessage, successMessage]);
 
-  const overRideSpinner = {
-    margin: "1% auto",
-  };
   return (
     <div className="min-w-screen min-h-screen flex justify-center items-center bg-[#e9e8f7]">
       <div className="w-[350px] text-white p-2">

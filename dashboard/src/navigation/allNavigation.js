@@ -11,6 +11,7 @@ import { FaCodePullRequest, FaUserXmark } from "react-icons/fa6";
 import { SiLivechat } from "react-icons/si";
 import { IoMdAddCircleOutline } from "react-icons/io";
 import { RiAlignItemLeftFill } from "react-icons/ri";
+import { CgProfile } from "react-icons/cg";
 
 export const allNav = [
   {
@@ -124,5 +125,12 @@ export const allNav = [
     icon: <MdOutlineContactSupport />,
     role: "seller",
     path: "/seller/dashboard/chat-support",
+  },
+  {
+    id: 16,
+    name: "Profile",
+    icon: <CgProfile />,
+    role: "seller",
+    path: "/seller/dashboard/profile",
   },
 ];

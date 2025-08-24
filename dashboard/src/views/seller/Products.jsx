@@ -87,7 +87,7 @@ const Products = () => {
                 <td className="py-3 px-4 font-medium whitespace-nowrap">
                   <div className="flex justify-start items-center gap-3">
                     <Link
-                      to="#"
+                      to={`/seller/dashboard/edit-product/21`}
                       className="text-white hover:underline p-2 bg-blue-500 hover:bg-blue-700 hover:shadow-md rounded"
                     >
                       <FaEdit />

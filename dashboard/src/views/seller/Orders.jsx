@@ -64,7 +64,7 @@ const Orders = () => {
                 <td className="py-3 px-4 font-medium whitespace-nowrap">
                   <div className="flex justify-start items-center gap-3">
                     <Link
-                      to="#"
+                      to="/seller/dashboard/orders/details/11"
                       className="text-white hover:underline p-2 bg-green-500 hover:bg-green-700 hover:shadow-md rounded"
                     >
                       <FaEye />
