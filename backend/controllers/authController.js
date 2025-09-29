@@ -1,3 +1,5 @@
+const { IncomingForm } = require("formidable");
+const cloudinary = require("cloudinary").v2;
 const adminModel = require("../models/adminModel");
 const sellerCustomerModel = require("../models/chat/sellerCustomerModel");
 const sellerModel = require("../models/sellerModel");
@@ -137,6 +139,80 @@ class authController {
       responseReturn(res, 500, {
         error: error.message,
       });
+    }
+  };
+
+  upload_profile_image = async (req, res) => {
+    const { id } = req;
+    const form = new IncomingForm({ multiples: true });
+
+    form.parse(req, async (err, _, files) => {
+      try {
+        if (err) {
+          return responseReturn(res, 500, { error: err.message });
+        }
+
+        const file = Array.isArray(files.image) ? files.image[0] : files.image;
+
+        if (!file) {
+          return responseReturn(res, 400, { error: "No image file provided" });
+        }
+        // cloudinary config
+        cloudinary.config({
+          cloud_name: process.env.CLOUD_NAME,
+          api_key: process.env.API_KEY,
+          api_secret: process.env.API_SECRET,
+          secure: true,
+        });
+
+        const result = await cloudinary.uploader.upload(file.filepath, {
+          folder: `profile_images/seller`,
+        });
+        console.log(result);
+
+        if (result) {
+          await sellerModel.findByIdAndUpdate(id, {
+            image: result.secure_url,
+          });
+
+          const updatedSeller = await sellerModel.findById(id);
+
+          return responseReturn(res, 200, {
+            updatedSeller,
+            message: "Profile image uploaded successfully",
+          });
+        } else {
+          return responseReturn(res, 500, { error: "Image upload failed" });
+        }
+      } catch (error) {
+        return responseReturn(res, 500, {
+          error: error.message,
+          details: error,
+        });
+      }
+    });
+  };
+
+  add_profile_info = async (req, res) => {
+    const { shopName, division, district, sub_district } = req.body;
+    const { id } = req;
+    try {
+      await sellerModel.findByIdAndUpdate(id, {
+        shopInfo: {
+          shopName,
+          division,
+          district,
+          sub_district,
+        },
+      });
+      const userInfo = await sellerModel.findById(id);
+
+      return responseReturn(res, 201, {
+        message: "Profile information added successfully",
+        userInfo,
+      });
+    } catch (error) {
+      return responseReturn(res, 501, { error: error.message });
     }
   };
 }

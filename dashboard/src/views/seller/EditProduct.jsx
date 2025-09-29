@@ -1,6 +1,17 @@
 import React, { useEffect, useState } from "react";
-import { IoMdCloseCircle, IoMdImage } from "react-icons/io";
-import { Link } from "react-router-dom";
+import { IoMdImage } from "react-icons/io";
+import { useDispatch, useSelector } from "react-redux";
+import { Link, useParams } from "react-router-dom";
+import { get_category } from "../../store/Reducers/categoryReducer";
+import {
+  get_editable_product,
+  messageCleared,
+  update_product,
+  update_product_images,
+} from "../../store/Reducers/productReducer";
+import { BarLoader } from "react-spinners";
+import { overRideSpinner } from "../../utils/utils";
+import toast from "react-hot-toast";
 
 const EditProduct = () => {
   const [inputText, setInputText] = useState({
@@ -11,47 +22,33 @@ const EditProduct = () => {
     brand: "",
     stock: "",
   });
+  const { productId } = useParams();
+  const dispatch = useDispatch();
 
-  const categories = [
-    {
-      id: 1,
-      name: "T-shirt",
-    },
-    {
-      id: 2,
-      name: "smart-phone",
-    },
-    {
-      id: 3,
-      name: "computer",
-    },
-    {
-      id: 4,
-      name: "cloth",
-    },
-    {
-      id: 5,
-      name: "fan",
-    },
-    {
-      id: 6,
-      name: "books",
-    },
-    {
-      id: 7,
-      name: "foot-wear",
-    },
-    {
-      id: 8,
-      name: "food",
-    },
-  ];
+  const { categories } = useSelector((state) => state.category);
+  const { product, isLoading, successMessage, errorMessage } = useSelector(
+    (state) => state.product
+  );
+
+  useEffect(() => {
+    dispatch(
+      get_category({
+        searchValue: "",
+        perPage: "",
+        page: "",
+      })
+    );
+  }, [dispatch]);
+
+  useEffect(() => {
+    dispatch(get_editable_product(productId));
+  }, [productId]);
 
   const [categoryShow, setCategoryShow] = useState(false);
   const [category, setCategory] = useState("");
   const [allCategory, setAllCategory] = useState([]);
   const [searchValue, setSearchValue] = useState("");
-  const [images, setImages] = useState([]);
+  // const [images, setImages] = useState([]);
   const [imagesShow, setImagesShow] = useState([]);
 
   const handleInput = (e) => {
@@ -74,29 +71,77 @@ const EditProduct = () => {
 
   const handleChangeImage = (img, files) => {
     if (files.length > 0) {
-      console.log(img);
-      console.log(files[0]);
+      dispatch(
+        update_product_images({
+          oldImage: img,
+          newImage: files[0],
+          productId: productId,
+        })
+      );
     }
   };
 
-  useEffect(() => {
-    setInputText({
-      name: "iPhone 16 Pro Max",
-      description:
-        "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ab, nam.",
-      price: "1200",
-      discount: "5",
-      brand: "Apple",
-      stock: "11",
-    });
+  const handleUpdateProduct = (e) => {
+    e.preventDefault();
+    const obj = {
+      name: inputText.name,
+      description: inputText.description,
+      price: inputText.price,
+      discount: inputText.discount,
+      brand: inputText.brand,
+      stock: inputText.stock,
+      productId: productId,
+    };
+    dispatch(update_product(obj));
+  };
 
-    setCategory("smart-phone");
-    setImagesShow([
-      "http://localhost:3000/images/seller.png",
-      "http://localhost:3000/images/admin.png",
-      "http://localhost:3000/images/seller.jpg",
-    ]);
-  }, []);
+  useEffect(() => {
+    if (categories.length > 0) {
+      setAllCategory(categories);
+    }
+  }, [categories]);
+
+  useEffect(() => {
+    if (product) {
+      setInputText({
+        name: product?.name || "",
+        description: product?.description || "",
+        price: product?.price || "",
+        discount: product?.discount || "",
+        brand: product?.brand || "",
+        stock: product?.stock || "",
+      });
+
+      setCategory(product?.category || "");
+      setImagesShow(product?.image || []);
+    }
+  }, [product]);
+
+  useEffect(() => {
+    if (successMessage) {
+      toast.success(successMessage);
+      if (successMessage.toLowerCase().includes("product updated")) {
+        setInputText({
+          name: "",
+          description: "",
+          price: "",
+          discount: "",
+          brand: "",
+          stock: "",
+        });
+        setCategory("");
+        setImagesShow([]);
+      }
+
+      dispatch(messageCleared());
+    }
+
+    if (errorMessage) {
+      toast.error(errorMessage);
+      dispatch(messageCleared());
+    }
+  }, [successMessage, errorMessage]);
+
   return (
     <div className="px-2 lg:px-7 pt-5">
       <div className="bg-white w-full rounded-md p-4">
@@ -110,7 +155,7 @@ const EditProduct = () => {
           </Link>
         </div>
         <div>
-          <form>
+          <form onSubmit={handleUpdateProduct}>
             <div className="flex flex-col md:flex-row gap-4 w-full">
               <div className="flex flex-col w-full gap-1">
                 <label htmlFor="name">Product Name</label>
@@ -119,7 +164,7 @@ const EditProduct = () => {
                   name="name"
                   placeholder="Product name"
                   className="outline-none px-4 py-2 bg-transparent focus:border-blue-400 border-slate-300 rounded-md border"
-                  value={inputText.name}
+                  value={inputText.name || ""}
                   onChange={handleInput}
                   id="name"
                 />
@@ -131,7 +176,7 @@ const EditProduct = () => {
                   name="brand"
                   placeholder="Brand name"
                   className="outline-none px-4 py-2 bg-transparent focus:border-blue-400 border-slate-300 rounded-md border"
-                  value={inputText.brand}
+                  value={inputText.brand || ""}
                   onChange={handleInput}
                   id="brand-name"
                 />
@@ -144,7 +189,7 @@ const EditProduct = () => {
                   type="text"
                   placeholder="-- select category --"
                   className="outline-none px-4 py-2 bg-transparent focus:border-blue-400 border-slate-300 rounded-md border"
-                  value={category}
+                  value={category || ""}
                   onChange={handleInput}
                   id="category"
                   readOnly
@@ -161,28 +206,29 @@ const EditProduct = () => {
                       placeholder="search"
                       className="w-full outline-none px-4 py-2 bg-transparent focus:border-blue-400 border-slate-300 rounded-md border overflow-hidden text-white"
                       onChange={searchCategory}
-                      value={searchValue}
+                      value={searchValue || ""}
                     />
                   </div>
 
                   <div className="pt-14"></div>
                   <div className="flex flex-col justify-start items-start h-[200px] overflow-y-scroll">
-                    {allCategory.map((cate, i) => (
-                      <span
-                        key={i}
-                        onClick={() => {
-                          setCategoryShow(false);
-                          setCategory(cate.name);
-                          setSearchValue("");
-                          setAllCategory(categories);
-                        }}
-                        className={`px-4 py-2 hover:bg-indigo-400 hover:text-white hover:shadow-md w-full cursor-pointer ${
-                          category === cate.name && "bg-indigo-400"
-                        }`}
-                      >
-                        {cate.name}
-                      </span>
-                    ))}
+                    {allCategory.length > 0 &&
+                      allCategory.map((cate, i) => (
+                        <span
+                          key={i}
+                          onClick={() => {
+                            setCategoryShow(false);
+                            setCategory(cate.name);
+                            setSearchValue("");
+                            setAllCategory(categories);
+                          }}
+                          className={`px-4 py-2 hover:bg-indigo-400 hover:text-white hover:shadow-md w-full cursor-pointer ${
+                            category === cate.name && "bg-indigo-400"
+                          }`}
+                        >
+                          {cate.name}
+                        </span>
+                      ))}
                   </div>
                 </div>
               </div>
@@ -193,7 +239,7 @@ const EditProduct = () => {
                   name="stock"
                   placeholder="Product stock"
                   className="outline-none px-4 py-2 bg-transparent focus:border-blue-400 border-slate-300 rounded-md border"
-                  value={inputText.stock}
+                  value={inputText.stock || ""}
                   onChange={handleInput}
                   id="stock"
                 />
@@ -207,7 +253,7 @@ const EditProduct = () => {
                   name="price"
                   placeholder="Price"
                   className="outline-none px-4 py-2 bg-transparent focus:border-blue-400 border-slate-300 rounded-md border"
-                  value={inputText.price}
+                  value={inputText.price || ""}
                   onChange={handleInput}
                   id="price"
                 />
@@ -219,7 +265,7 @@ const EditProduct = () => {
                   name="discount"
                   placeholder="% Discount"
                   className="outline-none px-4 py-2 bg-transparent focus:border-blue-400 border-slate-300 rounded-md border"
-                  value={inputText.discount}
+                  value={inputText.discount || ""}
                   onChange={handleInput}
                   id="discount"
                 />
@@ -234,30 +280,32 @@ const EditProduct = () => {
                 className="outline-none px-4 py-2 bg-transparent focus:border-blue-400 border-slate-300 rounded-md border"
                 cols="20"
                 rows="8"
-                value={inputText.description}
+                value={inputText.description || ""}
                 onChange={handleInput}
                 placeholder="Write description here..."
               ></textarea>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4 w-full mb-4 mt-6">
-              {imagesShow.map((img, i) => (
-                <div className="h-[200px] relative" key={i}>
-                  <label htmlFor={i}>
-                    <img
-                      src={img}
-                      alt="Product Img"
-                      className="w-full h-full object-cover"
+              {imagesShow &&
+                imagesShow.length > 0 &&
+                imagesShow.map((img, i) => (
+                  <div className="h-[200px] relative" key={i}>
+                    <label htmlFor={i}>
+                      <img
+                        src={img}
+                        alt="Product Img"
+                        className="w-full h-full object-cover"
+                      />
+                    </label>
+                    <input
+                      type="file"
+                      id={i}
+                      onChange={(e) => handleChangeImage(img, e.target.files)}
+                      className="hidden"
                     />
-                  </label>
-                  <input
-                    type="file"
-                    id={i}
-                    onChange={(e) => handleChangeImage(img, e.target.files)}
-                    className="hidden"
-                  />
-                </div>
-              ))}
+                  </div>
+                ))}
 
               <label
                 className="flex justify-center items-center flex-col h-[200px] border border-dashed hover:border-green-400 w-full"
@@ -277,8 +325,20 @@ const EditProduct = () => {
               />
             </div>
             <div className="flex">
-              <button className="bg-green-600 hover:bg-green-700 transition-all ease-in-out duration-150 hover:shadow-md text-white rounded-md px-7 py-3 my-4">
-                Save Changes
+              <button
+                type="submit"
+                disabled={isLoading ? true : false}
+                className="bg-green-600 hover:bg-green-700 transition-all ease-in-out duration-150 hover:shadow-md text-white rounded-md px-7 py-3 my-4"
+              >
+                {isLoading ? (
+                  <BarLoader
+                    color="#ffffff"
+                    width={100}
+                    cssOverride={overRideSpinner}
+                  />
+                ) : (
+                  "Save Changes"
+                )}
               </button>
             </div>
           </form>

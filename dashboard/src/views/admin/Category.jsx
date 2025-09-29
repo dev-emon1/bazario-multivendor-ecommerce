@@ -1,15 +1,72 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { FaEdit, FaImage, FaTrash } from "react-icons/fa";
 import { IoMdClose } from "react-icons/io";
 import { Link } from "react-router-dom";
 import Pagination from "../Pagination";
 import Search from "../components/Search";
+import { BarLoader } from "react-spinners";
+import { overRideSpinner } from "../../utils/utils";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  add_category,
+  get_category,
+  messageCleared,
+} from "../../store/Reducers/categoryReducer";
+import toast from "react-hot-toast";
 
 const Category = () => {
-  const [currentPage, setCurrentPage] = React.useState(1);
-  const [searchQuery, setSearchQuery] = React.useState("");
-  const [perPage, setPerPage] = React.useState(5);
-  const [show, setShow] = React.useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [perPage, setPerPage] = useState(5);
+  const [show, setShow] = useState(false);
+  const [image, setImage] = useState("");
+  const [categoryText, setCategoryText] = useState({
+    name: "",
+    image: "",
+  });
+
+  const dispatch = useDispatch();
+  const { isLoading, successMessage, errorMessage, categories } = useSelector(
+    (state) => state.category
+  );
+
+  const handleImage = (e) => {
+    const files = e.target.files;
+    if (files.length > 0) {
+      setImage(URL.createObjectURL(files[0]));
+      setCategoryText({ ...categoryText, image: files[0] });
+    }
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    dispatch(add_category(categoryText));
+  };
+
+  useEffect(() => {
+    if (successMessage) {
+      toast.success(successMessage);
+      dispatch(messageCleared());
+      setCategoryText({
+        name: "",
+        image: "",
+      });
+      setImage("");
+    }
+    if (errorMessage) {
+      toast.error(errorMessage);
+      dispatch(messageCleared());
+    }
+  }, [successMessage, errorMessage]);
+
+  useEffect(() => {
+    const obj = {
+      perPage: parseInt(perPage),
+      page: parseInt(currentPage),
+      searchQuery,
+    };
+    dispatch(get_category(obj));
+  }, [searchQuery, perPage, currentPage]);
   return (
     <div className="px-2 lg:px-7 pt-5">
       <h1 className="text-xl font-bold mb-4">Categories</h1>
@@ -28,27 +85,10 @@ const Category = () => {
           <div className="bg-white w-full p-4 rounded-md shadow-md">
             <Search
               setPerPage={setPerPage}
-              placeholder={"Order ID"}
+              placeholder={"Category name"}
               searchQuery={searchQuery}
               setSearchQuery={setSearchQuery}
             />
-            {/* <div className="flex items-center justify-between">
-              <select
-                className="px-4 py-2 hover:border-indigo-300 outline-none bg-indigo-200 border border-slate-500 rounded-md text-black"
-                onChange={(e) => setPerPage(parseInt(e.target.value))}
-              >
-                <option value="5">5</option>
-                <option value="10">10</option>
-                <option value="15">15</option>
-                <option value="20">20</option>
-              </select>
-
-              <input
-                type="text"
-                className="px-2 py-2 outline-none bg-transparent border border-[#e0e0e0] rounded-md min-w-[200px] text-[#030818] text-sm"
-                placeholder="Search by "
-              />
-            </div> */}
             <div className="relative overflow-x-auto rounded">
               <table className="w-full text-sm text-left bg-white text-black uppercase">
                 <thead className="text-sm text-black uppercase border-b border-gray-300">
@@ -69,7 +109,7 @@ const Category = () => {
                 </thead>
 
                 <tbody>
-                  {[1, 2, 3, 4, 5].map((d, i) => (
+                  {categories.map((c, i) => (
                     <tr
                       key={i}
                       className="border-b border-gray-200 hover:bg-gray-100"
@@ -78,14 +118,10 @@ const Category = () => {
                         {i + 1}
                       </td>
                       <td className="py-3 px-4 font-medium whitespace-nowrap">
-                        <img
-                          className="w-11 h-11"
-                          src={`http://localhost:3000/images/category/${d}.jpg`}
-                          alt=""
-                        />
+                        <img className="w-11 h-11" src={c.image} alt="" />
                       </td>
                       <td className="py-3 px-4 font-medium whitespace-nowrap">
-                        pending
+                        {c.name}
                       </td>
                       <td className="py-3 px-4 font-medium whitespace-nowrap">
                         <div className="flex justify-start items-center gap-3">
@@ -139,7 +175,7 @@ const Category = () => {
                   <IoMdClose size={24} />
                 </div>
               </div>
-              <form>
+              <form onSubmit={handleSubmit}>
                 <div className="flex flex-col w-full gap-1 mb-7">
                   <input
                     type="text"
@@ -147,6 +183,10 @@ const Category = () => {
                     id="name"
                     name="category_name"
                     placeholder="Category name"
+                    value={categoryText.name}
+                    onChange={(e) =>
+                      setCategoryText({ ...categoryText, name: e.target.value })
+                    }
                   />
                 </div>
                 <div>
@@ -154,21 +194,45 @@ const Category = () => {
                     htmlFor="image"
                     className="flex justify-center items-center flex-col h-[249px] w-full cursor-pointer border border-dashed hover:border-green-300 border-black mb-3"
                   >
-                    <span>
-                      <FaImage />
-                    </span>
-                    <span>Select Image</span>
+                    {image ? (
+                      <img
+                        src={image}
+                        alt="category"
+                        className="w-full h-full"
+                      />
+                    ) : (
+                      <>
+                        {" "}
+                        <span>
+                          <FaImage />
+                        </span>
+                        <span>Select Image</span>{" "}
+                      </>
+                    )}
                   </label>
                   <input
                     type="file"
                     id="image"
                     name="image"
                     className="hidden"
+                    onChange={handleImage}
                   />
 
                   <div>
-                    <button className="bg-green-600 hover:bg-green-700 transition-all ease-in-out duration-150 w-full hover:shadow-md text-white rounded-md px-7 py-3 my-4">
-                      Add Category
+                    <button
+                      type="submit"
+                      disabled={isLoading ? true : false}
+                      className="bg-green-600 hover:bg-green-700 transition-all ease-in-out duration-150 w-full hover:shadow-md text-white rounded-md px-7 py-3 my-4"
+                    >
+                      {isLoading ? (
+                        <BarLoader
+                          color="#ffffff"
+                          width={100}
+                          cssOverride={overRideSpinner}
+                        />
+                      ) : (
+                        " Add Category"
+                      )}
                     </button>
                   </div>
                 </div>

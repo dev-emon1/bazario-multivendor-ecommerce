@@ -101,6 +101,6 @@ export const sellerRoutes = [
     path: "/seller/dashboard/profile",
     element: <SellerProfile />,
     role: "seller",
-    status: "active",
+    ability: ["activate", "deactivate", "pending"],
   },
 ];
