@@ -13,7 +13,7 @@ import { IoMdAddCircleOutline } from "react-icons/io";
 import { RiAlignItemLeftFill } from "react-icons/ri";
 import { CgProfile } from "react-icons/cg";
 
-export const allNav = [
+export const allNavigation = [
   {
     id: 1,
     name: "Dashboard",
