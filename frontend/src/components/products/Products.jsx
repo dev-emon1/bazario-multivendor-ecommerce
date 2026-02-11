@@ -24,17 +24,17 @@ const Products = () => {
   const ButtonGroup = () => {};
   return (
     <div className="flex gap-8">
-      h2r
-      <Carousel
+      {
+        /* <Carousel
         autoPlay={true}
         infinite={true}
         arrows={true}
         transitionDuration={500}
-        responsive={responsive}
-        renderButtonGroupOutside={true}
-        customButtonGroup={<ButtonGroup />}
-      >
-        {products.map((p, i) => (
+        responsive={responsive} */
+        // renderButtonGroupOutside={true}
+        // customButtonGroup={<ButtonGroup />
+        // >
+        /* {products.map((p, i) => (
           <div className="flex flex-col justify-start gap-2" key={i}>
             {p.map((pl, j) => (
               <Link to="#" className="flex items-start justify-start" key={j}>
@@ -51,8 +51,9 @@ const Products = () => {
               </Link>
             ))}
           </div>
-        ))}
-      </Carousel>
+        ))} */
+        /* </Carousel> */
+      }
     </div>
   );
 };

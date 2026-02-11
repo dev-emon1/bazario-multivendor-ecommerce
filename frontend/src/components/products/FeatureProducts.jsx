@@ -21,7 +21,7 @@ const FeatureProducts = () => {
                 10%
               </div>
               <img
-                src={`http://localhost:3000/images/products/${i + 1}.webp`}
+                src={`http://localhost:3001/images/products/${i + 1}.webp`}
                 alt=""
                 className="sm:w-full w-full h-[240px]"
               />

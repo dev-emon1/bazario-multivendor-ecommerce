@@ -30,7 +30,7 @@ const Banner = () => {
                 {[1, 2, 3, 4, 5, 6].map((img, i) => (
                   <Link to="#" key={i}>
                     <img
-                      src={`http://localhost:3000/images/banner/${img}.jpg`}
+                      src={`http://localhost:3001/images/banner/${img}.jpg`}
                       alt=""
                     />
                   </Link>

@@ -6,6 +6,7 @@ const sellerModel = require("../models/sellerModel");
 const { createToken } = require("../utils/generateToken");
 const { responseReturn } = require("../utils/response");
 const bcrypt = require("bcrypt");
+
 class authController {
   admin_login = async (req, res) => {
     try {

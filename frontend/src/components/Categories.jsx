@@ -41,7 +41,7 @@ const Categories = () => {
           <Link to="#" key={i} className="h-[185px] block border">
             <div className="w-full h-full p-3">
               <img
-                src={`http://localhost:3000/images/products/${i + 1}.webp`}
+                src={`http://localhost:3001/images/products/${i + 1}.webp`}
                 alt=""
               />
               <div className="absolute w-full mx-auto bottom-6 left-0 flex justify-center items-center font-bold">
